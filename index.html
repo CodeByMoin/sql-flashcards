@@ -926,11 +926,179 @@ const CARDS = [
   q:"Summary: Sub-query operators ALL vs ANY — truth condition comparison.",
   a:"ALL operator:\n• Returns TRUE if ALL values at RHS satisfy the condition\n• SAL > ALL(2000,4000,5000) → TRUE only if SAL > 5000 (the MAX)\n• 'Greater than ALL' = greater than the maximum\n• 'Less than ALL'    = less than the minimum\n\nANY operator:\n• Returns TRUE if ANY ONE value at RHS satisfies the condition\n• SAL > ANY(2000,4000,5000) → TRUE if SAL > 2000 (the MIN)\n• 'Greater than ANY' = greater than the minimum\n• 'Less than ANY'    = less than the maximum\n\nMemory trick:\n  ALL → compare against WORST CASE (maximum for >, minimum for <)\n  ANY → compare against BEST CASE  (minimum for >, maximum for <)" },
 
-/* ── ADD NEXT BATCH OF NOTES HERE ────────────────────────────────
-   When you give new notes (ORDER BY, DDL, DML, TCL, DCL etc.),
-   add new card objects here in the same format:
-   { cat:"ORDER BY", q:"What is ORDER BY?", a:"..." },
-   ─────────────────────────────────────────────────────────────── */
+/* ── OUTER JOIN ──────────────────────────────────────────────── */
+{ cat:"Outer Join",
+  q:"What is Outer Join? What does it return?",
+  a:"Outer Join is used to obtain BOTH matching AND unmatching records.\n\n3 types:\ni)  Left Outer Join\nii) Right Outer Join\niii) Full Outer Join" },
+
+{ cat:"Outer Join",
+  q:"What is Left Outer Join? Give Oracle and ANSI syntax.",
+  a:"Used to obtain UNMATCHED records of the LEFT table along with the MATCHING records.\n\nOracle syntax:\nSELECT */COL-NAME/EXPRESSION\nFROM TABLE1, TABLE2\nWHERE TABLE1.COL-NAME = TABLE2.COL-NAME (+);\n\nANSI syntax:\nSELECT */COL-NAME/EXPRESSION\nFROM TABLE1 LEFT JOIN TABLE2\nON TABLE1.COL-NAME = TABLE2.COL-NAME;\n\nNote: (+) goes on the RIGHT side in Oracle for Left Outer Join." },
+
+{ cat:"Outer Join",
+  q:"Show the result table of Left Outer Join with example (EMP left join DEPT).",
+  a:"EMP table:            DEPT table:\nENAME | DNO           DNO | DNAME\n  A   |  10           10 |  D1\n  B   | NULL          20 |  D2\n  C   |  30           30 |  D3\n  D   | NULL          40 |  D4\n\nSELECT *\nFROM EMP, DEPT\nWHERE EMP.DNO = DEPT.DNO (+);\n\nResult Table:\nENAME | DNO  | DNO  | DNAME\n  A   |  10  |  10  |  D1     ← Matching\n  C   |  30  |  30  |  D3     ← Matching\n  B   | NULL | NULL | NULL    ← Unmatched from LEFT (EMP)\n  D   | NULL | NULL | NULL    ← Unmatched from LEFT (EMP)" },
+
+{ cat:"Outer Join",
+  q:"What is Right Outer Join? Give Oracle and ANSI syntax.",
+  a:"Used to obtain UNMATCHED records of the RIGHT table along with the MATCHING records.\n\nOracle syntax:\nSELECT */COL-NAME/EXPRESSION\nFROM TABLE1, TABLE2\nWHERE TABLE1.COL-NAME (+) = TABLE2.COL-NAME;\n\nANSI syntax:\nSELECT */COL-NAME/EXPRESSION\nFROM TABLE1 RIGHT OUTER JOIN TABLE2\nON TABLE1.COL-NAME = TABLE2.COL-NAME;\n\nNote: (+) goes on the LEFT side in Oracle for Right Outer Join." },
+
+{ cat:"Outer Join",
+  q:"Show the result table of Right Outer Join with example (EMP right join DEPT).",
+  a:"SELECT *\nFROM EMP, DEPT\nWHERE EMP.DNO (+) = DEPT.DNO;\n\nResult Table:\nENAME | DNO  | DNO  | DNAME\n  A   |  10  |  10  |  D1     ← Matching\n  C   |  30  |  30  |  D3     ← Matching\n NULL | NULL |  20  |  D2     ← Unmatched from RIGHT (DEPT)\n NULL | NULL |  40  |  D4     ← Unmatched from RIGHT (DEPT)" },
+
+{ cat:"Outer Join",
+  q:"What is Full Outer Join? Give ANSI syntax and show result table.",
+  a:"Used to obtain UNMATCHED records from BOTH LEFT and RIGHT tables along with the MATCHING records.\n\nANSI syntax only (no Oracle (+) shorthand for FULL):\nSELECT */COL-NAME/EXPRESSION\nFROM TABLE1 FULL OUTER JOIN TABLE2\nON TABLE1.COL-NAME = TABLE2.COL-NAME;\n\nExample:\nSELECT *\nFROM EMP FULL OUTER JOIN DEPT\nON EMP.DNO = DEPT.DNO;\n\nResult Table:\nENAME | DNO  | DNO  | DNAME\n  A   |  10  |  10  |  D1     ← Matching\n  C   |  30  |  30  |  D3     ← Matching\n  B   | NULL | NULL | NULL    ← Unmatched from LEFT\n  D   | NULL | NULL | NULL    ← Unmatched from LEFT\n NULL | NULL |  20  |  D2     ← Unmatched from RIGHT\n NULL | NULL |  40  |  D4     ← Unmatched from RIGHT" },
+
+{ cat:"Outer Join",
+  q:"[Interview] Where does (+) go in Oracle syntax for Left vs Right Outer Join?",
+  a:"Left Outer Join  → (+) goes on the RIGHT side:\n  WHERE TABLE1.COL = TABLE2.COL (+)\n  (We want all of TABLE1 — put (+) on the side that can be NULL)\n\nRight Outer Join → (+) goes on the LEFT side:\n  WHERE TABLE1.COL (+) = TABLE2.COL\n  (We want all of TABLE2 — put (+) on the side that can be NULL)\n\nMemory trick: (+) goes on the OPPOSITE side of the table you want ALL records from." },
+
+/* ── SELF JOIN ───────────────────────────────────────────────── */
+{ cat:"Self Join",
+  q:"What is a Self Join? When/why do we use it?",
+  a:"Joining the SAME table with itself is known as Self Join.\n\nWhen/Why: The data to be selected is in the SAME table but present in DIFFERENT records.\nMost common use: EMP-MGR relationship — employee and manager are both in the EMP table.\n\nOracle syntax:\nSELECT *\nFROM TABLE T1, TABLE T2\nWHERE <JOIN_CONDITION>;\n\nANSI syntax:\nSELECT *\nFROM TABLE T1 JOIN TABLE T2\nON <JOIN_CONDITION>;\n\nJoin Condition: T1.COL-NAME = T2.COL-NAME\n\nNote: We must give ALIASES (T1, T2) to treat the same table as two separate copies." },
+
+{ cat:"Self Join",
+  q:"Self Join: Show the internal working with EMP table (E1.MGR = E2.ENO).",
+  a:"EMP-E1 (employee side):    EMP-E2 (manager side):\nENO | ENAME | MGR            ENO | ENAME | MGR\n 1  | ALLEN |  2              1  | ALLEN |  2\n 2  | BLAKE |  3              2  | BLAKE |  3\n 3  | JAMES |  4              3  | JAMES |  4\n 4  | SCOTT |  5              4  | SCOTT |  5\n 5  | MILLER|  1              5  | MILLER|  1\n\nSELECT *\nFROM EMP E1, EMP E2\nWHERE E1.MGR = E2.ENO;\n\nResult Table (E1.ENO | E1.ENAME | E1.MGR | E2.ENO | E2.ENAME | E2.MGR):\n 1  | ALLEN  |  2  |  2  | BLAKE  |  3\n 2  | BLAKE  |  3  |  3  | JAMES  |  4\n 3  | JAMES  |  4  |  4  | SCOTT  |  5\n 4  | SCOTT  |  5  |  5  | MILLER |  1\n 5  | MILLER |  1  |  1  | ALLEN  |  2" },
+
+{ cat:"Self Join",
+  q:"Write Self Join query: employee name + manager's name for all employees.",
+  a:"SELECT E1.ENAME, E2.ENAME\nFROM EMP E1, EMP E2\nWHERE E1.MGR = E2.EMPNO;" },
+
+{ cat:"Self Join",
+  q:"Write Self Join query: employee name, salary, manager's name and manager's salary.",
+  a:"SELECT E1.ENAME, E1.SAL, E2.ENAME, E2.SAL\nFROM EMP E1, EMP E2\nWHERE E1.MGR = E2.EMPNO;" },
+
+{ cat:"Self Join",
+  q:"Write Self Join query: employee name + manager name + their dept no, if employee is a CLERK.",
+  a:"SELECT E1.ENAME, E2.ENAME, E1.DEPTNO, E2.DEPTNO\nFROM EMP E1, EMP E2\nWHERE E1.MGR = E2.EMPNO\n  AND E1.JOB = 'CLERK';" },
+
+{ cat:"Self Join",
+  q:"Write Self Join query: employee name + manager's designation if manager works in dept 10 or 20.",
+  a:"SELECT E1.ENAME, E2.JOB\nFROM EMP E1, EMP E2\nWHERE E1.MGR = E2.EMPNO\n  AND E2.DEPTNO IN (10, 20);" },
+
+{ cat:"Self Join",
+  q:"Write Self Join query: employee name + manager's salary if BOTH earn more than 2300.",
+  a:"SELECT E1.ENAME, E2.SAL\nFROM EMP E1, EMP E2\nWHERE E1.MGR = E2.EMPNO\n  AND E1.SAL > 2300\n  AND E2.SAL > 2300;" },
+
+{ cat:"Self Join",
+  q:"Write Self Join query: employee name + manager's comm if employee is SALESMAN and manager is in dept 30.",
+  a:"SELECT E1.ENAME, E2.COMM\nFROM EMP E1, EMP E2\nWHERE E1.MGR = E2.EMPNO\n  AND E1.JOB = 'MANAGER'\n  AND E2.DEPTNO = 30;" },
+
+{ cat:"Self Join",
+  q:"Write Self Join query: employee name, hiredate, manager's name, manager's hiredate — if manager was hired BEFORE the employee.",
+  a:"SELECT E1.ENAME, E1.HIREDATE, E2.NAME, E2.HIREDATE\nFROM EMP E1, EMP E2\nWHERE E1.MGR = E2.EMPNO\n  AND E1.HIREDATE > E2.HIREDATE;" },
+
+{ cat:"Self Join",
+  q:"Write Self Join query: employee name + manager's name + manager works as same designation.",
+  a:"SELECT E1.ENAME, E2.ENAME, E1.JOB, E2.JOB\nFROM EMP E1, EMP E2\nWHERE E1.MGR = E2.EMPNO\n  AND E1.JOB = E2.JOB;" },
+
+{ cat:"Self Join",
+  q:"What is the rule for joining N tables? Write a 3-table Self Join + DEPT query.",
+  a:"Rule: To join N number of tables, we must write N-1 number of join conditions.\n\n3-table example — employee name, manager name, employee location (clerks only):\nSELECT E1.ENAME, E2.ENAME, D1.LOC\nFROM EMP E1, EMP E2, DEPT D1\nWHERE E1.DEPTNO = D1.DEPTNO\n  AND E1.MGR = E2.EMPNO\n  AND E1.JOB = 'CLERK';\n\n-- 3 tables → 2 join conditions ✓" },
+
+{ cat:"Self Join",
+  q:"Write a 3-level chain query: employee name, manager name, manager's manager name.",
+  a:"SELECT E1.ENAME, E2.ENAME, E3.ENAME\nFROM EMP E1, EMP E2, EMP E3\nWHERE E1.MGR = E2.EMPNO\n  AND E2.MGR = E3.EMPNO;\n\n-- E1 = employee, E2 = manager, E3 = manager's manager\n-- 3 copies of EMP → 2 join conditions ✓" },
+
+{ cat:"Self Join",
+  q:"Write query using Self Join + DEPT (4 tables): employee name, emp deptname, manager name, manager's deptname — if manager was hired before 1982.",
+  a:"SELECT E1.ENAME, D1.DNAME, E2.ENAME, D2.DNAME\nFROM EMP E1, DEPT D1, EMP E2, DEPT D2\nWHERE E1.DEPTNO = D1.DEPTNO\n  AND E2.DEPTNO = D2.DEPTNO\n  AND E1.MGR = E2.EMPNO\n  AND E2.HIREDATE < '01-JAN-1982';\n\n-- 4 tables → 3 join conditions ✓" },
+
+/* ── SINGLE ROW FUNCTIONS — LIST ─────────────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What are the 16 Single Row Functions listed in the notes?",
+  a:"1.  LENGTH()         — count characters in a string\n2.  CONCAT()         — join two strings\n3.  UPPER()          — convert to uppercase\n4.  LOWER()          — convert to lowercase\n5.  INITCAP()        — initial capital (title case)\n6.  REVERSE()        — reverse a string\n7.  SUBSTR()         — extract part of a string  [IMP]\n8.  INSTR()          — find position of string    [IMP]\n9.  REPLACE()        — replace string with another\n10. MOD()            — modulus/remainder\n11. TRUNC()          — truncate number to lower value\n12. ROUND()          — round-off a number\n13. MONTHS_BETWEEN() — months between two dates\n14. LAST_DAY()       — last day of a month\n15. TO_CHAR()        — convert date to string format\n16. NVL()            — NULL value logic             [IMP]\n\nNote: All are Single Row Functions — execute row by row, N inputs → N outputs." },
+
+{ cat:"Single Row Functions",
+  q:"What is the DUAL table?",
+  a:"DUAL is a DUMMY TABLE which has 1 column and 1 row.\nIt is used to output/display the result of a function or expression when no actual table is needed.\n\nTo see its structure:\nDESC DUAL;\n\nTo use it:\nSELECT *\nFROM DUAL;\n\nExample usage:\nSELECT LENGTH('BANGALORE')\nFROM DUAL;\n\nSELECT ROUND(5.5)\nFROM DUAL;" },
+
+/* ── LENGTH ──────────────────────────────────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What is LENGTH()? Give syntax and example.",
+  a:"Used to COUNT the number of characters present in the given string.\n\nSyntax: LENGTH('string')\n\nExample:\nSELECT LENGTH(ENAME)\nFROM EMP;\n\nQuery using LENGTH in WHERE — employees with exactly 4 characters in name:\nSELECT ENAME\nFROM EMP\nWHERE LENGTH(ENAME) = 4;" },
+
+/* ── CONCAT ──────────────────────────────────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What is CONCAT()? Give syntax and example.",
+  a:"Used to JOIN two given strings.\n\nSyntax: CONCAT('string1', 'string2')\n\nExample:\nSELECT CONCAT('HI ', ENAME)\nFROM EMP;\n\nNote: CONCAT() takes exactly 2 arguments.\nFor more than 2 strings, use the || operator:\nSELECT 'HI ' || ENAME || ' how are you'\nFROM EMP;" },
+
+/* ── UPPER / LOWER / INITCAP / REVERSE ───────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What are UPPER(), LOWER(), INITCAP(), REVERSE()? Give syntax for each.",
+  a:"UPPER() — converts a given string to UPPERCASE\nSyntax: UPPER('string')\n\nLOWER() — converts a given string to LOWERCASE\nSyntax: LOWER('string')\n\nINITCAP() — converts a given string to INITIAL CAPITAL (Title Case)\nSyntax: INITCAP('string')\n\nREVERSE() — reverses a given string\nSyntax: REVERSE('string')\n\nExample — all four in one query:\nSELECT ENAME, UPPER(ENAME), LOWER(ENAME),\n       INITCAP(ENAME), REVERSE(ENAME)\nFROM EMP;" },
+
+/* ── SUBSTR ───────────────────────────────────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What is SUBSTR()? [IMP] Give syntax, notes, and examples with BANGALORE.",
+  a:"Used to EXTRACT a part of a string from the given original string.\n\nSyntax: SUBSTR('original-string', Position, [LENGTH])\n\nNote: LENGTH is NOT mandatory.\nIf length is not mentioned, consider the complete remaining string.\n\nPositive positions (left to right): B=1, A=2, N=3, G=4, A=5, L=6, O=7, R=8, E=9\nNegative positions (right to left): B=-9, A=-8, N=-7, G=-6, A=-5, L=-4, O=-3, R=-2, E=-1\n\nSUBSTR('BANGALORE', 1, 4) → BANG\nSUBSTR('BANGALORE', 4, 4) → GALO\nSUBSTR('BANGALORE', 5, 1) → A\nSUBSTR('BANGALORE', -6, 3) → GAL\nSUBSTR('BANGALORE', 7, 7) → ORE\nSUBSTR('BANGALORE', 5)    → ALORE\n\nTable queries:\nSELECT ENAME, SUBSTR(ENAME, 1, 3)\nFROM EMP;\n-- First 3 characters\n\nSELECT ENAME, SUBSTR(ENAME, -3)\nFROM EMP;\n-- Last 3 characters\n\nSELECT ENAME\nFROM EMP\nWHERE SUBSTR(ENAME, 1, 1) = 'A';\n-- Names starting with A (using SRF)" },
+
+/* ── REPLACE ─────────────────────────────────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What is REPLACE()? Give syntax, note, and examples.",
+  a:"Used to REPLACE a string with another string in the original string.\n\nSyntax: REPLACE('original-string', 'string', ['new-string'])\n\nNote: If the third argument is not mentioned, the default value is NULL (i.e., the matched string is deleted).\n\nExamples with 'BANGALORE':\nREPLACE('BANGALORE','B','M')   → MAGALORE\nREPLACE('BANGALORE','A','N')   → BNNGNLORE\nREPLACE('BANGALORE','G','K')   → BANKALORE\nREPLACE('BANGALORE','A','ALO') → BALOGALOLORE\nREPLACE('BANGALORE','A')       → BNGLORE  (A deleted — no 3rd arg)\n\nTrick query — count occurrences of 'A' in 'MALAYALAM':\nSELECT LENGTH('MALAYALAM') - LENGTH(REPLACE('MALAYALAM','A'))\nFROM DUAL;\n→ 9 - 6 = 3 occurrences of 'A'\n\nFind employees with character 'A' exactly twice:\nSELECT ENAME\nFROM EMP\nWHERE LENGTH(ENAME) - LENGTH(REPLACE(ENAME,'A')) = 2;" },
+
+/* ── INSTR ───────────────────────────────────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What is INSTR()? [IMP] Give syntax, note, and examples with MALAYALAM.",
+  a:"Used to SEARCH for a string in the original string.\nIf present → returns the POSITION.\nIf not present → returns 0.\n\nSyntax: INSTR('Original_String', 'String', Position, [Occurrence])\n\nNote: If occurrence is not mentioned, the default value is 1.\n\nMALAYALAM positions: M=1, A=2, L=3, A=4, Y=5, A=6, L=7, A=8, M=9\n\nINSTR('MALAYALAM','A', 1, 1) → 2   (1st A from position 1)\nINSTR('MALAYALAM','A', 1, 3) → 6   (3rd A from position 1)\nINSTR('MALAYALAM','A', 1, 5) → 0   (5th A doesn't exist)\nINSTR('MALAYALAM','A', 2, 1) → 2   (1st A from position 2)\nINSTR('MALAYALAM','A', 3, 2) → 6   (2nd A from position 3)\nINSTR('MALAYALAM','A', 6, 1) → 6   (1st A from position 6)\nINSTR('MALAYALAM','A', 4)    → 4   (1st A from position 4)\n\nQuery — employees with 'A' in name (using INSTR):\nSELECT ENAME\nFROM EMP\nWHERE INSTR(ENAME, 'A', 1, 1) > 0;" },
+
+/* ── MOD ─────────────────────────────────────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What is MOD()? Give syntax and example.",
+  a:"Used to obtain the MODULUS / REMAINDER of the given number.\n\nSyntax: MOD(m, n)\n(n divides m → gives remainder)\n\nQuery — details of employees with EVEN employee numbers:\nSELECT *\nFROM EMP\nWHERE MOD(EMPNO, 2) = 0;\n\nQuery — employees hired on EVEN dates:\nSELECT *\nFROM EMP\nWHERE MOD(TO_CHAR(HIREDATE, 'DD'), 2) = 0;  [Interview]" },
+
+/* ── ROUND ───────────────────────────────────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What is ROUND()? Give syntax and examples.",
+  a:"Used to ROUND-OFF the given number based on the scale value.\n\nSyntax: ROUND(Number, [Scale])\n\nExamples:\nSELECT ROUND(5.2), ROUND(5.5), ROUND(5.9)\nFROM DUAL;\n→ 5, 6, 6\n\nRule: If decimal part < 5 → round down; if ≥ 5 → round up.\nDefault scale = 0 (rounds to nearest integer)." },
+
+/* ── TRUNC ───────────────────────────────────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What is TRUNC()? How does it differ from ROUND()? Give examples.",
+  a:"TRUNC is similar to ROUND(), but it ALWAYS rounds-off the given number to the LOWER value (truncates — never rounds up).\n\nSyntax: TRUNC(Number, [Scale])\n\nExamples:\nSELECT TRUNC(5.2), TRUNC(5.5), TRUNC(5.9)\nFROM DUAL;\n→ 5, 5, 5  (always goes to lower value)\n\nCompare:\nROUND(5.5) → 6  (rounds up)\nTRUNC(5.5) → 5  (always truncates down)" },
+
+/* ── DATE COMMANDS ───────────────────────────────────────────── */
+{ cat:"Date Functions",
+  q:"What are the 3 Date Commands? What does each return?",
+  a:"1. SYSDATE:\n   Returns today's date.\n   SELECT SYSDATE FROM DUAL;\n\n2. CURRENT_DATE:\n   Also returns today's date.\n   SELECT CURRENT_DATE FROM DUAL;\n\n3. SYSTIMESTAMP:\n   Returns date, time, and time zone.\n   SELECT SYSTIMESTAMP FROM DUAL;" },
+
+/* ── MONTHS_BETWEEN ──────────────────────────────────────────── */
+{ cat:"Date Functions",
+  q:"What is MONTHS_BETWEEN()? Give syntax and example.",
+  a:"Used to obtain the NUMBER OF MONTHS present between the given two dates.\n\nSyntax: MONTHS_BETWEEN(DATE1, DATE2)\n\nExample:\nSELECT MONTHS_BETWEEN(SYSDATE, '27-SEP-25')\nFROM DUAL;\n\nQuery — months passed since each employee's hiredate:\nSELECT MONTHS_BETWEEN(SYSDATE, HIREDATE)\nFROM EMP;" },
+
+/* ── LAST_DAY ────────────────────────────────────────────────── */
+{ cat:"Date Functions",
+  q:"What is LAST_DAY()? Give syntax and example.",
+  a:"Used to obtain the LAST DAY of the particular month of the given date.\n\nSyntax: LAST_DAY(DATE)\n\nExample:\nSELECT LAST_DAY(SYSDATE)\nFROM DUAL;\n→ 30-SEP-26  (last day of current month)" },
+
+/* ── TO_CHAR ─────────────────────────────────────────────────── */
+{ cat:"Date Functions",
+  q:"What is TO_CHAR()? Give syntax and all 17 format models.",
+  a:"Used to CONVERT the given date into STRING FORMAT based on the model given.\n\nSyntax: TO_CHAR(DATE, 'Format-Models')\n\nAll 17 Format Models:\n1.  YEAR  → TWENTY TWENTY-SIX\n2.  YYYY  → 2026\n3.  YY    → 26\n4.  MONTH → SEPTEMBER\n5.  MON   → SEP\n6.  MM    → 09\n7.  DAY   → SUNDAY\n8.  DY    → SUN\n9.  DD    → 27\n10. D     → 1  (day number in week; 1=Sunday)\n11. HH24  → 10 (24-hour format)\n12. HH12  → 10 (12-hour format)\n13. MI    → 11 (minutes)\n14. SS    → 45 (seconds)\n15. HH12:MI:SS → '10:11:55'\n16. DD-MM-YY   → '27-09-26'\n17. MM-DD-YYYY → '09-27-2026'\n\nQuery — employees hired on Monday:\nSELECT *\nFROM EMP\nWHERE TO_CHAR(HIREDATE, 'D') = 1;\n\nQuery — employees hired on even dates [Interview]:\nSELECT *\nFROM EMP\nWHERE MOD(TO_CHAR(HIREDATE, 'DD'), 2) = 0;" },
+
+/* ── NVL ─────────────────────────────────────────────────────── */
+{ cat:"Single Row Functions",
+  q:"What is NVL()? [IMP] Give syntax, arguments, and example.",
+  a:"NVL = NULL VALUE LOGIC.\nUsed to ELIMINATE the side effects of using NULL in arithmetic operations.\n\nSyntax: NVL(Argument1, Argument2)\n\nArgument 1: Any column/expression which can result in NULL\nArgument 2: A numeric value which will be SUBSTITUTED if Argument 1 results in NULL\n\nIf Argument 1 is NOT NULL → the same value is used (no substitution).\n\nExample:\nEMP table: ALLEN=1000 + COMM=100, BLAKE=2000 + COMM=NULL\n\nSELECT ENAME, SAL + NVL(COMM, 0)\nFROM EMP;\n\nResult:\nALLEN → 1000 + NVL(100, 0)  = 1000 + 100 = 1100\nBLAKE → 2000 + NVL(NULL, 0) = 2000 + 0   = 2000\nJAMES → 3000 + NVL(300, 0)  = 3000 + 300 = 3300\nSCOTT → 4000 + NVL(NULL, 0) = 4000 + 0   = 4000\n\nWithout NVL: SAL + NULL = NULL (any arithmetic with NULL = NULL)" },
+
+/* ── ORDER BY ────────────────────────────────────────────────── */
+{ cat:"ORDER BY",
+  q:"What is ORDER BY clause? State all its key rules.",
+  a:"ORDER BY clause is used to ARRANGE the records either in ASCENDING or DESCENDING order.\n\nKey rules:\n1. Executes ROW-BY-ROW\n2. Must be written as the LAST statement in the query\n3. It is the ONLY clause which executes AFTER SELECT clause\n4. By default, ORDER BY arranges records in ASCENDING order\n   (Use DESC for descending)\n\nSyntax (full query structure):\nSELECT  GROUP BY EXPRESSION/GROUP FUNCTION\nFROM    TABLE-NAME\nWHERE   ROW-FILTER-CONDITION\nGROUP BY COL-NAME/EXPRESSION\nHAVING  GROUP-FILTER-CONDITION\nORDER BY COL-NAME/EXPRESSION [ASC/DESC];" },
+
+{ cat:"ORDER BY",
+  q:"What is the complete ORDER OF EXECUTION of all SQL clauses?",
+  a:"Order of WRITING (top to bottom):\nSELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY\n\nOrder of EXECUTION (actual sequence):\n1. FROM clause\n2. WHERE clause   (if used)\n3. GROUP BY clause (if used)\n4. HAVING clause  (if used)\n5. SELECT clause\n6. ORDER BY clause\n\nKey points:\n• FROM executes FIRST — goes to database, finds the table\n• ORDER BY executes LAST — after SELECT prepares the result table\n• ORDER BY is the only clause that executes after SELECT" },
+
+{ cat:"ORDER BY",
+  q:"Write ORDER BY queries: salary ascending; salary descending; name alphabetically; multiple columns.",
+  a:"-- Ascending (default):\nSELECT ENAME, SAL\nFROM EMP\nORDER BY SAL;\n\n-- Descending:\nSELECT ENAME, SAL\nFROM EMP\nORDER BY SAL DESC;\n\n-- Alphabetically by name:\nSELECT ENAME\nFROM EMP\nORDER BY ENAME ASC;\n\n-- Multiple columns (primary sort by dept, secondary by salary desc):\nSELECT ENAME, DEPTNO, SAL\nFROM EMP\nORDER BY DEPTNO ASC, SAL DESC;\n\n-- With WHERE:\nSELECT ENAME, SAL\nFROM EMP\nWHERE DEPTNO = 20\nORDER BY SAL DESC;" },
 
 ]; // ← END OF CARDS ARRAY — do not delete this line
 
